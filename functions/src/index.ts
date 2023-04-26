@@ -34,20 +34,15 @@ const justPassMeIssuer = new Issuer({
 
 const clientSecret = "a297e53858cdb72e913e1eb7be58cded7ba0a57ce1f2cdbf79a454ba";
 
-const callbackURL = "https://us-central1-flutterdemo-f5263.cloudfunctions.net/oidc/callback/";
-// "http://localhost:5001/flutterdemo-f5263/us-central1/oidc/callback/";
 const client = new justPassMeIssuer.Client({
   client_id: "532492",
   client_secret: clientSecret,
   response_types: ["code"],
-  redirect_uris: [callbackURL],
   id_token_signed_response_alg: "HS256",
-  // token_endpoint_auth_method (default "client_secret_basic")
 });
 
 declare global {
   namespace Express {
-    // Inject additional properties on express.Request
     interface Request {
       user?: admin.auth.DecodedIdToken;
     }
@@ -94,6 +89,14 @@ const authenticateFirebase = async (
   return;
 };
 
+const callbackURL = (req: Request): string => {
+  if (process.env.FUNCTIONS_EMULATOR) {
+    return `http://${req.get("Host")}/${process.env.GCLOUD_PROJECT}/us-central1/oidc/callback/`;
+  } else {
+    return `https://${req.get("Host")}/oidc/callback/`;
+  }
+};
+
 app.use(cors());
 app.use(authenticateFirebase);
 app.get("/authenticate", (req, res) => {
@@ -112,6 +115,7 @@ app.get("/authenticate", (req, res) => {
     hint_mode: "token",
     prompt,
     AMWALPLATFORM: req.headers["amwal-platform"],
+    redirect_uri: callbackURL(req),
     nonce,
     state,
   };
@@ -127,7 +131,10 @@ app.get("/authenticate", (req, res) => {
 app.get("/callback", async (req, res) => {
   const params = client.callbackParams(req);
   const {nonce, state, prompt} = req.session;
-  const tokenSet = await client.callback(callbackURL, params, {nonce, state});
+  const tokenSet = await client.callback(
+    callbackURL(req),
+    params,
+    {nonce, state});
   functions.logger.log("received and validated tokens:", tokenSet);
   functions.logger.log("validated ID Token claims:", tokenSet.claims());
   if (prompt == "create") {
