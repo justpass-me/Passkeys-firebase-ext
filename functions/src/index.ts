@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import * as cors from "cors";
@@ -24,18 +25,20 @@ app.use(
   })
 );
 
+const endpointServer = "https://thebank.verify.1pass.tech";
+
 const justPassMeIssuer = new Issuer({
   issuer: "http://127.0.0.1:5080/openid", // "https://accounts.justpass.me";
-  authorization_endpoint: "https://thebank.verify.1pass.tech/openid/authorize/",
-  token_endpoint: "https://thebank.verify.1pass.tech/openid/token/",
-  jwks_uri: "https://thebank.verify.1pass.tech/openid/jwks",
-  userinfo_endpoint: "https://thebank.verify.1pass.tech/openid/userinfo/",
+  authorization_endpoint: `${endpointServer}/openid/authorize/`,
+  token_endpoint: `${endpointServer}/openid/token/`,
+  jwks_uri: `${endpointServer}/openid/jwks`,
+  userinfo_endpoint: `${endpointServer}/openid/userinfo/`,
 });
 
-const clientSecret = "a297e53858cdb72e913e1eb7be58cded7ba0a57ce1f2cdbf79a454ba";
+const clientSecret = process.env.JUSTPASSME_API_SECRET!;
 
 const client = new justPassMeIssuer.Client({
-  client_id: "532492",
+  client_id: process.env.JUSTPASSME_ID!,
   client_secret: clientSecret,
   response_types: ["code"],
   id_token_signed_response_alg: "HS256",

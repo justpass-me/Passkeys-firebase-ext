@@ -1,0 +1,102 @@
+name: justpass-me
+version: 0.0.1
+specVersion: v1beta  # Firebase Extensions specification version (do not edit)
+
+displayName: Authenticate with justpass.me
+description: Provide easy passkey biometric authentication integration across web and mobile
+
+license: Apache-2.0  # The license you want for the extension
+
+author:
+  authorName: justpass.me
+  url: https://justpass.me/
+
+sourceUrl: https://github.com/justpas-me
+
+billingRequired: true
+
+# Google APIs that are enabled by default when the extension is installed
+apis:
+  - apiName: iam.googleapis.com
+    reason: To sign custom authentication token
+  - apiName: iamcredentials.googleapis.com
+    reason: To sign custom authentication token
+  - apiName: stackdriver.googleapis.com
+    reason: Monitoring
+  - apiName: monitoring.googleapis.com
+    reason: Monitoring
+  - apiName: logging.googleapis.com
+    reason: Monitoring
+  - apiName: secretmanager.googleapis.com
+    reason: Securely storing and reading Snap OAuth 2.0 client secret
+
+params:
+  - param: LOCATION
+    label: Cloud Functions location
+    description: >-
+      Where do you want to deploy the functions created for this extension?
+      For help selecting a location, refer to the [location selection
+      guide](https://firebase.google.com/docs/functions/locations).
+    type: select
+    options:
+      - label: us-central1 (Iowa)
+        value: us-central1
+      - label: us-east1 (South Carolina)
+        value: us-east1
+      - label: us-east4 (Northern Virginia)
+        value: us-east4
+      - label: us-west2 (Los Angeles)
+        value: us-west2
+      - label: us-west3 (Salt Lake City)
+        value: us-west3
+      - label: us-west4 (Las Vegas)
+        value: us-west4
+      - label: asia-east2 (Hong Kong)
+        value: asia-east2
+      - label: asia-northeast1 (Tokyo)
+        value: asia-northeast1
+      - label: asia-northeast2 (Osaka)
+        value: asia-northeast2
+      - label: asia-northeast3 (Seoul)
+        value: asia-northeast3
+      - label: asia-south1 (Mumbai)
+        value: asia-south1
+      - label: asia-southeast2 (Jakarta)
+        value: asia-southeast2
+      - label: australia-southeast1 (Sydney)
+        value: australia-southeast1
+      - label: europe-central2 (Warsaw)
+        value: europe-central2
+      - label: europe-west1 (Belgium)
+        value: europe-west1
+      - label: europe-west2 (London)
+        value: europe-west2
+      - label: europe-west3 (Frankfurt)
+        value: europe-west3
+      - label: europe-west6 (Zurich)
+        value: europe-west6
+      - label: northamerica-northeast1 (Montreal)
+        value: northamerica-northeast1
+      - label: southamerica-east1 (Sao Paulo)
+        value: southamerica-east1
+    default: us-central1
+    required: true
+    immutable: true
+  - param: JUSTPASSME_ID
+    label: Client Id from justpass.me dashboard
+    description: What is your justpass.me id?
+    type: string
+    required: true
+  - param: JUSTPASSME_API_SECRET
+    label: API secret for the justpass.me
+    description: What is your justpass.me API secret?
+    type: secret
+    required: true
+
+resources:
+  - name: oidc
+    type: firebaseextensions.v1beta.function
+    properties:
+      location: ${LOCATION}
+      runtime: nodejs16
+      httpsTrigger: {}
