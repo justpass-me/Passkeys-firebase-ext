@@ -1,5 +1,3 @@
-Sure, here is the markdown version of the rewrite.
-
 # Justpass.me Passkey Firebase Extension 🚀
 
 ## Before you begin 📝
