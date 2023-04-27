@@ -70,11 +70,9 @@ const authenticateFirebase = async (
   res: Response,
   next: NextFunction
 ) => {
-  functions.logger.log("Check if request is authorized with Firebase ID token");
   let idToken;
   if ( req.headers.authorization &&
      req.headers.authorization.startsWith("Bearer ")) {
-    functions.logger.log("Found \"Authorization\" header");
     // Read the ID Token from the Authorization header.
     idToken = req.headers.authorization.split("Bearer ")[1];
   }
@@ -82,7 +80,6 @@ const authenticateFirebase = async (
   if (idToken) {
     try {
       const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-      functions.logger.log("ID Token correctly decoded");
       req.user = decodedIdToken;
     } catch (error) {
       functions.logger.error("Error while verifying Firebase ID token:", error);
@@ -94,7 +91,7 @@ const authenticateFirebase = async (
 
 const callbackURL = (req: Request): string => {
   if (process.env.FUNCTIONS_EMULATOR) {
-    return `http://${req.get("Host")}/${process.env.GCLOUD_PROJECT}/us-central1/oidc/callback/`;
+    return `http://${req.get("Host")}/${process.env.GCLOUD_PROJECT}/${process.env.LOCATION}/ext-justpass-me-oidc/callback/`;
   } else {
     return `https://${req.get("Host")}/ext-justpass-me-oidc/callback/`;
   }
@@ -138,8 +135,6 @@ app.get("/callback", async (req, res) => {
     callbackURL(req),
     params,
     {nonce, state});
-  functions.logger.log("received and validated tokens:", tokenSet);
-  functions.logger.log("validated ID Token claims:", tokenSet.claims());
   if (prompt == "create") {
     res.json({
       "status": "OK",
