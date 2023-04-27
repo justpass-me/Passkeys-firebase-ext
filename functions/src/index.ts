@@ -25,7 +25,7 @@ app.use(
   })
 );
 
-const endpointServer = "https://thebank.verify.1pass.tech";
+const endpointServer = `https://${process.env.JUSTPASSME_ORGANIZATION_NAME}.verify.1pass.tech`;
 
 const justPassMeIssuer = new Issuer({
   issuer: "http://127.0.0.1:5080/openid", // "https://accounts.justpass.me";
@@ -96,7 +96,7 @@ const callbackURL = (req: Request): string => {
   if (process.env.FUNCTIONS_EMULATOR) {
     return `http://${req.get("Host")}/${process.env.GCLOUD_PROJECT}/us-central1/oidc/callback/`;
   } else {
-    return `https://${req.get("Host")}/oidc/callback/`;
+    return `https://${req.get("Host")}/ext-justpass-me-oidc/callback/`;
   }
 };
 
