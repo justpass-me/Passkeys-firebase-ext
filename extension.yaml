@@ -4,6 +4,7 @@ specVersion: v1beta  # Firebase Extensions specification version (do not edit)
 
 displayName: Authenticate with justpass.me
 description: Provide easy passkey biometric authentication integration across web and mobile
+icon: JustpassMeLogo.png
 
 license: Apache-2.0  # The license you want for the extension
 
