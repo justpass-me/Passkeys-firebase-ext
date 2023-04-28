@@ -25,10 +25,12 @@ app.use(
   })
 );
 
-const endpointServer = `https://${process.env.JUSTPASSME_ORGANIZATION_NAME}.verify.1pass.tech`;
+const endpointServer = process.env.FUNCTIONS_EMULATOR?
+  `http://${process.env.JUSTPASSME_ORGANIZATION_NAME}.verify.justpass.local`:
+  `https://${process.env.JUSTPASSME_ORGANIZATION_NAME}.verify.justpass.me`;
 
 const justPassMeIssuer = new Issuer({
-  issuer: "http://127.0.0.1:5080/openid", // "https://accounts.justpass.me";
+  issuer: "http://127.0.0.1:8080/openid", // "https://accounts.justpass.me";
   authorization_endpoint: `${endpointServer}/openid/authorize/`,
   token_endpoint: `${endpointServer}/openid/token/`,
   jwks_uri: `${endpointServer}/openid/jwks`,
