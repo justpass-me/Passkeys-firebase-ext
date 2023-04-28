@@ -29,7 +29,7 @@ const endpointServer = `https://${process.env.JUSTPASSME_ORGANIZATION_NAME}.acco
 
 const issuer = process.env.FUNCTIONS_EMULATOR?
   "http://myapp.verify.justpass.local/openid":
-  "http://127.0.0.1:8080/openid";
+  "https://verify.justpass.me/openid";
 
 const justPassMeIssuer = new Issuer({
   issuer: `${endpointServer}/openid`,
