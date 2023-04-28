@@ -29,8 +29,12 @@ const endpointServer = process.env.FUNCTIONS_EMULATOR?
   `http://${process.env.JUSTPASSME_ORGANIZATION_NAME}.verify.justpass.local`:
   `https://${process.env.JUSTPASSME_ORGANIZATION_NAME}.verify.justpass.me`;
 
+const issuer = process.env.FUNCTIONS_EMULATOR?
+  "http://myapp.verify.justpass.local/openid":
+  "http://127.0.0.1:8080/openid";
+
 const justPassMeIssuer = new Issuer({
-  issuer: "http://127.0.0.1:8080/openid", // "https://accounts.justpass.me";
+  issuer,
   authorization_endpoint: `${endpointServer}/openid/authorize/`,
   token_endpoint: `${endpointServer}/openid/token/`,
   jwks_uri: `${endpointServer}/openid/jwks`,
@@ -93,7 +97,7 @@ const authenticateFirebase = async (
 
 const callbackURL = (req: Request): string => {
   if (process.env.FUNCTIONS_EMULATOR) {
-    return `http://${req.get("Host")}/${process.env.GCLOUD_PROJECT}/${process.env.LOCATION}/ext-justpass-me-oidc/callback/`;
+    return `http://${req.get("Host")}/${process.env.GCLOUD_PROJECT}/${process.env.LOCATION}/ext-justpass-me-local-oidc/callback/`;
   } else {
     return `https://${req.get("Host")}/ext-justpass-me-oidc/callback/`;
   }
