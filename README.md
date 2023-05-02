@@ -7,6 +7,8 @@
 
 - [Install or update to the latest version of the Firebase CLI.](https://firebase.google.com/docs/cli#install_the_firebase_cli) This will let you install and manage Firebase extensions from the command line.👩‍💻
 
+- Make sure Cloud Storage is Enabled for your project, You can make sure that it's enabled from this link : https://console.cloud.google.com/apis/api/firestore.googleapis.com/overview
+
 - Find out either your Firebase project ID or previously configured project alias. You will need this to install the extension.
 
     - [Project ID](https://firebase.google.com/docs/projects/learn-more#project-id) — You can run this command from anywhere on your computer to see a list of your Firebase projects and their IDs.🔎
@@ -23,7 +25,24 @@
     - JUSTPASSME_API_SECRET
 
 ## Install extension 🛠️
+### Development 
+
+1. Run the following command
+
+```shell
+firebase init
+```
+2. Choose `Extensions: Set up an empty Extensions manifest`
+3. run the following command
+
+```shell
+firebase ext:install . --project=projectId-or-alias
+```
+
+### Marketplace
+
 To install the extension, run this command and replace `projectId-or-alias` with your project ID or alias.
+
 ```shell
 firebase ext:install publisher-id/extension-id --project=projectId-or-alias
 ```
