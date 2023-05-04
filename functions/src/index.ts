@@ -8,7 +8,7 @@ import * as jwt from "jsonwebtoken";
 import {FirestoreStore} from "@google-cloud/connect-firestore";
 import {Firestore} from "@google-cloud/firestore";
 import {Request, Response, NextFunction} from "express";
-import {Issuer, generators} from "openid-client";
+import {AuthorizationParameters, Issuer, generators} from "openid-client";
 
 admin.initializeApp();
 
@@ -56,7 +56,6 @@ declare module "express-session" {
   interface SessionData {
     nonce: string;
     state: string;
-    prompt: "create" | "login";
   }
 }
 
@@ -91,58 +90,92 @@ const authenticateFirebase = async (
 
 const callbackURL = (req: Request): string => {
   if (process.env.FUNCTIONS_EMULATOR) {
-    return `http://${req.get("Host")}/${process.env.GCLOUD_PROJECT}/${process.env.LOCATION}/ext-justpass-me-local-oidc/callback/`;
+    return `http://${req.get("Host")}/${process.env.GCLOUD_PROJECT}/${process.env.LOCATION}/ext-justpass-me-local-oidc`;
   } else {
-    return `https://${req.get("Host")}/ext-justpass-me-oidc/callback/`;
+    return `https://${req.get("Host")}/ext-justpass-me-oidc`;
   }
 };
 
 app.use(cors());
 app.use(authenticateFirebase);
-app.get("/authenticate", (req, res) => {
-  const nonce = generators.nonce();
-  const state = generators.state();
-  const prompt = req.user ? "create": "login";
-  req.session.nonce = nonce;
-  req.session.state = state;
-  req.session.prompt = prompt;
-  const params = {
-    scope: "openid token email profile",
-    response_mode: "code",
-    login_hint: req.user?.uid,
-    username: req.user?.email,
-    hint_mode: "token",
-    prompt,
-    AMWALPLATFORM: req.headers["amwal-platform"],
-    redirect_uri: callbackURL(req),
-    nonce,
-    state,
-  };
-  const signature = jwt.sign(params, clientSecret);
-  const authUrl = client.authorizationUrl({
-    ...params,
-    signature,
-  });
-  functions.logger.log(authUrl);
-  res.redirect(authUrl);
+
+const authRedirect =
+ ( req: Request, res: Response, params: AuthorizationParameters) => {
+   const nonce = generators.nonce();
+   const state = generators.state();
+   req.session.nonce = nonce;
+   req.session.state = state;
+   const finalParams = {
+     ...params,
+     scope: "openid token email profile",
+     response_mode: "code",
+     hint_mode: "token",
+     AMWALPLATFORM: req.headers["amwal-platform"],
+     nonce,
+     state,
+   };
+   const signature = jwt.sign(finalParams, clientSecret);
+   const authUrl = client.authorizationUrl({
+     ...finalParams,
+     signature,
+   });
+   functions.logger.log(authUrl);
+   res.redirect(authUrl);
+ };
+
+app.get("/register", (req, res) => {
+  const {user} = req;
+  if (user) {
+    const params = {
+      login_hint: user.uid,
+      username: user.email,
+      prompt: "create",
+      redirect_uri: `${callbackURL(req)}/register_callback/`,
+    };
+    authRedirect(req, res, params);
+  } else {
+    res.status(401).json({
+      "status": "ERR",
+      "message": "Must be logged in to register passkeys",
+    });
+  }
 });
 
-app.get("/callback", async (req, res, next) => {
+app.get("/authenticate", (req, res) => {
+  const params = {
+    prompt: "login",
+    redirect_uri: `${callbackURL(req)}/authenticate_callback/`,
+  };
+  authRedirect(req, res, params);
+});
+
+app.get("/register_callback", async (req, res, next) => {
   const params = client.callbackParams(req);
-  const {nonce, state, prompt} = req.session;
+  const {nonce, state} = req.session;
   try {
     const tokenSet = await client.callback(
-      callbackURL(req),
+      `${callbackURL(req)}/register_callback/`,
       params,
       {nonce, state});
-    if (prompt == "create") {
-      res.json({
-        "status": "OK",
-        "message": "Registered & Activated successfully, Try it on next login",
-        "claims": tokenSet.claims(),
-      });
-      return;
-    } else if (prompt == "login" && tokenSet.access_token) {
+    res.json({
+      "status": "OK",
+      "message": "Registered & Activated successfully, Try it on next login",
+      "claims": tokenSet.claims(),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get("/authenticate_callback", async (req, res, next) => {
+  const params = client.callbackParams(req);
+  const {nonce, state} = req.session;
+  try {
+    const tokenSet = await client.callback(
+      `${callbackURL(req)}/authenticate_callback/`,
+      params,
+      {nonce, state});
+    if (tokenSet.access_token) {
       const userinfo = await client.userinfo(tokenSet.access_token);
       if (userinfo.preferred_username) {
         const customToken = await admin.auth()
@@ -155,6 +188,10 @@ app.get("/callback", async (req, res, next) => {
         return;
       }
     }
+    res.status(401).json({
+      "status": "ERR",
+      "message": "Login failed",
+    });
   } catch (err) {
     next(err);
   }
