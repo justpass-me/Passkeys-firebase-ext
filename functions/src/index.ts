@@ -25,16 +25,10 @@ app.use(
   })
 );
 
-const endpointServer = process.env.FUNCTIONS_EMULATOR?
-  `http://${process.env.JUSTPASSME_ORGANIZATION_NAME}.verify.justpass.local`:
-  `https://${process.env.JUSTPASSME_ORGANIZATION_NAME}.verify.justpass.me`;
-
-const issuer = process.env.FUNCTIONS_EMULATOR?
-  "http://myapp.verify.justpass.local/openid":
-  "https://verify.justpass.me/openid";
+const endpointServer = `https://${process.env.JUSTPASSME_ORGANIZATION_NAME}.accounts.justpass.me`;
 
 const justPassMeIssuer = new Issuer({
-  issuer,
+  issuer: `${endpointServer}/openid`,
   authorization_endpoint: `${endpointServer}/openid/authorize/`,
   token_endpoint: `${endpointServer}/openid/token/`,
   jwks_uri: `${endpointServer}/openid/jwks`,
@@ -115,8 +109,7 @@ app.get("/authenticate", (req, res) => {
   const params = {
     scope: "openid token email profile",
     response_mode: "code",
-    // TODO: remove once usernameless flow works
-    login_hint: req.user?.uid?? "HN9uoDYjZtYaB4tCQDsek0sUGPK2",
+    login_hint: req.user?.uid,
     username: req.user?.email,
     hint_mode: "token",
     prompt,
@@ -134,32 +127,36 @@ app.get("/authenticate", (req, res) => {
   res.redirect(authUrl);
 });
 
-app.get("/callback", async (req, res) => {
+app.get("/callback", async (req, res, next) => {
   const params = client.callbackParams(req);
   const {nonce, state, prompt} = req.session;
-  const tokenSet = await client.callback(
-    callbackURL(req),
-    params,
-    {nonce, state});
-  if (prompt == "create") {
-    res.json({
-      "status": "OK",
-      "message": "Registered & Activated successfully, Try it on next login",
-      "claims": tokenSet.claims(),
-    });
-    return;
-  } else if (prompt == "login" && tokenSet.access_token) {
-    const userinfo = await client.userinfo(tokenSet.access_token);
-    if (userinfo.preferred_username) {
-      const customToken = await admin.auth()
-        .createCustomToken(userinfo.preferred_username);
+  try {
+    const tokenSet = await client.callback(
+      callbackURL(req),
+      params,
+      {nonce, state});
+    if (prompt == "create") {
       res.json({
         "status": "OK",
-        "message": "Logged in successfully",
-        "token": customToken,
+        "message": "Registered & Activated successfully, Try it on next login",
+        "claims": tokenSet.claims(),
       });
       return;
+    } else if (prompt == "login" && tokenSet.access_token) {
+      const userinfo = await client.userinfo(tokenSet.access_token);
+      if (userinfo.preferred_username) {
+        const customToken = await admin.auth()
+          .createCustomToken(userinfo.preferred_username);
+        res.json({
+          "status": "OK",
+          "message": "Logged in successfully",
+          "token": customToken,
+        });
+        return;
+      }
     }
+  } catch (err) {
+    next(err);
   }
 });
 
