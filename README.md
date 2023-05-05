@@ -40,15 +40,24 @@ Install the corresponding development SDK (iOS/Android/React Native/ Flutter) fr
 Here is an example code for registration and login for react native.
 
 ```Typescript
+import {register, authenticate} from 'justpass-me-react-native'
+
+const firebaseProjectName = "my-firebase-project" // the firebase project where the extension is installed
+const cloudLocation = "us-central1" // location where the extension is installed
+const extensionInstanceName = "ext-justpass-me"
+const baseURL = `https://${cloudLocation}-${firebaseProjectName}.cloudfunctions.net/${extensionInstanceName}-oidc`
+
 // registration
-const idToken = await auth().currentUser.getIdToken();
-await justPassMeClient.register({
-    Authorization: `Bearer ${idToken}`,
-});
+const registrationURL = `${baseURL}/register/`
+const extraHeaders = {
+    Authorization: `Bearer ${await auth().currentUser.getIdToken()}`
+}
+await register(registrationURL, extraHeaders)
 
 // login
-const result = await justPassMeClient.authenticate();
+const authenticationURL = `${baseURL}/authenticate/`
+const result = await authenticate(authenticationURL)
 if (result.token) {
-    await auth().signInWithCustomToken(result.token);
+    await auth().signInWithCustomToken(result.token)
 }
 ```
