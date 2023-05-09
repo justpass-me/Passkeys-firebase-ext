@@ -8,6 +8,7 @@
 - [Install or update to the latest version of the Firebase CLI.](https://firebase.google.com/docs/cli#install_the_firebase_cli) This will let you install and manage Firebase extensions from the command line.👩‍💻
 
 - Make sure Cloud Storage is Enabled for your project, You can make sure that it's enabled from this link : https://console.cloud.google.com/apis/api/firestore.googleapis.com/overview
+    - **Note** that Cloud Storage need to have atleast one database created.
 
 - Find out either your Firebase project ID or previously configured project alias. You will need this to install the extension.
 
@@ -37,6 +38,12 @@ firebase init
 
 ```shell
 firebase ext:install . --project=projectId-or-alias
+```
+4. (Optional) if you going to update the extension code it needs to be re-built
+
+```shell
+cd /functions
+npm run build
 ```
 
 ### Marketplace
