@@ -156,6 +156,7 @@ app.get("/authenticate", (req, res) => {
 app.get("/register_callback", async (req, res, next) => {
   const params = client.callbackParams(req);
   const {nonce, state} = req.session;
+  functions.logger.log(req.session);
   try {
     const tokenSet = await client.callback(
       `${callbackURL(req)}/register_callback/`,
@@ -174,6 +175,7 @@ app.get("/register_callback", async (req, res, next) => {
 app.get("/authenticate_callback", async (req, res, next) => {
   const params = client.callbackParams(req);
   const {nonce, state} = req.session;
+  functions.logger.log(req.session);
   try {
     const tokenSet = await client.callback(
       `${callbackURL(req)}/authenticate_callback/`,
