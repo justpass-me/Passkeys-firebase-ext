@@ -48,10 +48,10 @@ npm run build
 
 ### Marketplace
 
-To install the extension, run this command and replace `projectId-or-alias` with your project ID or alias.
+To install the extension, run this command
 
 ```shell
-firebase ext:install publisher-id/extension-id --project=projectId-or-alias
+firebase ext:install justpass-me/justpass-me --project=projectId-or-alias
 ```
 
 ## Deploy 🚢

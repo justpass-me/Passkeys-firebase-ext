@@ -32,6 +32,8 @@ apis:
     reason: Securely storing and reading Snap OAuth 2.0 client secret
 
 roles:
+  - role: firebaseauth.admin
+    reason: Required to authenticating the user.
   - role: datastore.user
     reason: Allows the extension to write updates to the database.
 
