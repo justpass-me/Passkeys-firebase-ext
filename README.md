@@ -87,3 +87,11 @@ if (result.token) {
     await auth().signInWithCustomToken(result.token)
 }
 ```
+
+## [iOS Demo Video](https://www.youtube.com/shorts/xs4uXyZxlUA)
+
+[![Firebase Passkey iOS Demo](https://img.youtube.com/vi/xs4uXyZxlUA/0.jpg)](https://www.youtube.com/shorts/xs4uXyZxlUA)
+
+## [Android Demo Video](https://www.youtube.com/shorts/YhKbyaEvHx4)
+
+[![Firebase Passkey Android Demo](https://img.youtube.com/vi/YhKbyaEvHx4/0.jpg)](https://www.youtube.com/shorts/YhKbyaEvHx4)

@@ -1,5 +1,5 @@
 name: justpass-me
-version: 0.1.1
+version: 0.1.2
 specVersion: v1beta  # Firebase Extensions specification version (do not edit)
 
 displayName: Authenticate with justpass.me
@@ -10,9 +10,9 @@ license: Apache-2.0  # The license you want for the extension
 
 author:
   authorName: justpass.me
-  url: https://justpass.me/
+  url: https://www.justpass.me/
 
-sourceUrl: https://github.com/justpas-me
+sourceUrl: https://github.com/justpass-me/justpass-me-firebase-ext
 
 billingRequired: true
 
@@ -36,6 +36,10 @@ roles:
     reason: Required to authenticating the user.
   - role: datastore.user
     reason: Allows the extension to write updates to the database.
+
+externalServices:
+  - name: justpass.me
+    PricingUri: https://www.justpass.me/#pricing
 
 params:
   - param: LOCATION
