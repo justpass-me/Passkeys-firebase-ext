@@ -25,7 +25,8 @@ app.use(
   })
 );
 
-const endpointServer = `https://${process.env.JUSTPASSME_ORGANIZATION_NAME}.accounts.justpass.me`;
+const orgName = process.env.JUSTPASSME_ORGANIZATION_NAME?.toLowerCase();
+const endpointServer = `https://${orgName}.accounts.justpass.me`;
 
 const justPassMeIssuer = new Issuer({
   issuer: `${endpointServer}/openid`,
