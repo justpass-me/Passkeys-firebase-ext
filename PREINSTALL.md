@@ -1,4 +1,4 @@
-Use this extension to authenticate your users using passkeys within your firebsae project. Migrate existing users and sign up new users using the frictionless secure passwordless authentication.
+Use this extension to authenticate your users using passkeys within your firebase project. Migrate existing users and sign up new users using the frictionless secure passwordless authentication.
 
 #### Additional setup
 
